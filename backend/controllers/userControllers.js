@@ -114,3 +114,28 @@ const updateUserPassword = asyncHandler(async(req, res) => {
 
     return res.status(200).json(new ApiResponse(200, null, "password updated successfully"))
 })
+
+//delete user
+const deleteUserById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  await user.deleteOne();
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "User deleted successfully"));
+});
+
+module.exports = {
+    getUsers,
+    getUserById,
+    updateUserById,
+    updateUserPassword,
+    deleteUserById
+}
