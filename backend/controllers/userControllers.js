@@ -45,6 +45,41 @@ const getUserById = asyncHandler(async(req, res) => {
     }
 
     return res
-    .status(200).
+    .status(200)
     .json(new ApiResponse(200, user, "user fetched successfully"))
+})
+
+//update user
+const updateUserById = asyncHandler(async(req, res) => {
+    const { id } = req.params;
+
+    const user = await User.findById(id).select("-password")
+
+    if(!user) {
+        throw new ApiError(404, "user not found")
+    }
+
+    //update only provided fields
+    user.name = req.body.name ?? user.name
+    user.email = req.body.email ?? user.email
+    user.team = req.body.team ?? user.team
+    user.workType = req.body.workType ?? user.workType
+
+    //boolean handling
+    if(typeof req.body.isActive !== "undefined") {
+        user.isActive = req.body.isActive
+    }
+
+    await user.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, {
+            _id: user_id,
+            name: user.name,
+            email: user.email,
+            team: user.team,
+            workType: user.workType,
+            isActive: user.isActive
+        }, "user updated successfully")
+    )
 })
