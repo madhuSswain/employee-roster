@@ -83,3 +83,34 @@ const updateUserById = asyncHandler(async(req, res) => {
         }, "user updated successfully")
     )
 })
+
+//update password
+const updateUserPassword = asyncHandler(async(req, res) => {
+    const {password, newPassword} = req.body;
+
+    //validation
+    if(!password || !newPassword) {
+        throw new ApiError(400, "Password and newPassword are required")
+    }
+
+    const user = await user.findById(req.user._id)
+
+    if (!user) {
+    throw new ApiError(404, "User not found");
+    }
+
+    //compare old password
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if(!isMatch) {
+        throw new ApiError(401, "Invalid password")
+    }
+
+    //hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    user.password = hashedPassword
+    await user.save()
+
+    return res.status(200).json(new ApiResponse(200, null, "password updated successfully"))
+})
